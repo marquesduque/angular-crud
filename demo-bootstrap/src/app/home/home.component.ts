@@ -1,5 +1,8 @@
-import {Component, OnInit, ViewEncapsulation} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { comprarComponent } from '../comprar/comprar.component';
+import { appService } from '../app.service';
 
 @Component({
   selector: 'app-home',
@@ -10,25 +13,38 @@ import {ActivatedRoute} from '@angular/router';
 export class HomeComponent implements OnInit {
 
   constructor(
-    private route: ActivatedRoute) {
+    private route: ActivatedRoute,
+    private service: appService,
+    private dialog: MatDialog) {
   }
-
-  needsLogin: boolean | undefined;
-  _userName: string = '';
 
   ngOnInit() {
-    this.needsLogin = !!this.route.snapshot.params['needsLogin'];
+    this.service.cotacao(new Date())
+      .subscribe(ent => {
+        this.entity.cotacao = ent.value[0].cotacaoCompra;
+        this.calcular('real');
+      },
+        err => {
+          alert('Oops ocorreu um erro')
+        }
+      );
+  }
+  calcular(tipo: String) {
+    if (tipo == 'dolar') {
+      this.entity.real = this.entity.dolar / this.entity.cotacao;
+    }
+    else {
+      this.entity.dolar = this.entity.real * this.entity.cotacao;
+    }
+  }
+  comprar() {
+    this.dialog.open(comprarComponent);
   }
 
-  get userName(): string {
-    return this._userName;
+  public entity = {
+    real: 1,
+    dolar: 1,
+    cotacao: 0
   }
 
-  login(): void {
-    this._userName = 'Max';
-  }
-
-  logout(): void {
-    this._userName = '';
-  }
 }

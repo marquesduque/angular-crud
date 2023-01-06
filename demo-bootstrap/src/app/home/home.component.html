@@ -1,11 +1,22 @@
-<h1 class="title">Welcome {{userName}}</h1>
-
-<div *ngIf="needsLogin" class="alert alert-warning">
-  You have been redirected to this page because you don't have the necessary
-  rights for the reqeusted action. Login with a respective user account!
+<h1 class="title text-center">COMPRAR DOLAR</h1>
+<div class="mb-3 text-center">
+  Informe abaixo quantos dolares deseja comprar
 </div>
 
-<button (click)="login()" class="btn btn-default">Login</button>
-<button (click)="logout()" class="btn btn-default">Logout</button>
 
+<div class="bg-white border rounded-5">
 
+  <section class="p-4 text-center">
+    <h4 class="text-center">$1 Dólar americano igual a R${{entity.cotacao}} Real brasileiro</h4>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Real Brasileiro</span>
+      <input currencyMask [options]="{ prefix: 'R$ ', thousands: '.', decimal: ',' }" type="tel" class="form-control" (keyup)="calcular('real')"
+        [(ngModel)]="entity.real">
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Dólar Americano</span>
+      <input currencyMask type="tel" class="form-control" [(ngModel)]="entity.dolar"  (keyup)="calcular('dolar')" >
+    </div>
+    <button  type="button" class="btn btn-primary" (click)="comprar()"><i class="bi bi-cart"></i> COMPRAR AGORA</button>
+  </section>
+</div>
