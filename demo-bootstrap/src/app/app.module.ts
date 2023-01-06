@@ -17,11 +17,27 @@ import { ComprarModule } from './comprar/comprar.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
 import { comprarComponent } from './comprar/comprar.component';
-import { DBConfig, NgxIndexedDBModule } from 'ngx-indexed-db';
+import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
+
+// Ahead of time compiles requires an exported function for factories
+export function migrationFactory() {
+  // The animal table was added with version 2 but none of the existing tables or data needed
+  // to be modified so a migrator for that version is not included.
+  return {
+    1: (db, transaction) => {
+      const store = transaction.objectStore('people');
+      store.createIndex('country', 'country', { unique: false });
+    },
+    3: (db, transaction) => {
+      const store = transaction.objectStore('people');
+      store.createIndex('age', 'age', { unique: false });
+    }
+  };
+}
 
 const dbConfig: DBConfig  = {
   name: 'MyDb',
-  version: 1,
+  version: 3,
   objectStoresMeta: [{
     store: 'people',
     storeConfig: { keyPath: 'id', autoIncrement: true },
@@ -29,7 +45,24 @@ const dbConfig: DBConfig  = {
       { name: 'name', keypath: 'name', options: { unique: false } },
       { name: 'email', keypath: 'email', options: { unique: false } }
     ]
-  }]
+  }, {
+    // animals added in version 2
+    store: 'animals',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'name', keypath: 'name', options: { unique: true } },
+    ]
+  },
+  {
+    // animals added in version 2
+    store: 'token',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'token', keypath: 'token', options: { unique: true } },
+    ]
+  }],
+  // provide the migration factory to the DBConfig
+  migrationFactory
 };
 
 @NgModule({
